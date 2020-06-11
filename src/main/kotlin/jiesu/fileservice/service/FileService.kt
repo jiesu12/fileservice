@@ -1,6 +1,6 @@
 package jiesu.fileservice.service
 
-import jiesu.fileservice.model.JFile
+import jiesu.fileservice.model.FileInfo
 import jiesu.fileservice.model.enums.FileType
 import org.springframework.stereotype.Service
 import java.io.File
@@ -10,9 +10,9 @@ class FileService(val dir: File) {
 
     private val checkouts: MutableSet<String> = mutableSetOf()
 
-    fun getJFile(path: String, detail: Boolean): JFile = checkPermission(path).toJFile(dir, detail)
+    fun getJFile(path: String, detail: Boolean): FileInfo = checkPermission(path).toJFile(dir, detail)
 
-    fun list(path: String, detail: Boolean): List<JFile> =
+    fun list(path: String, detail: Boolean): List<FileInfo> =
             checkPermission(path).listFiles()?.map { it.toJFile(dir, true) }?.toList().orEmpty()
 
     fun getText(path: String): String = checkPermission(path).readText()
@@ -43,9 +43,9 @@ class FileService(val dir: File) {
     }
 }
 
-fun File.toJFile(relativeTo: File, detail: Boolean): JFile {
+fun File.toJFile(relativeTo: File, detail: Boolean): FileInfo {
     val relativeFile = this.relativeTo(relativeTo)
-    val jfile = JFile(relativeFile.path, FileType.getType(this))
+    val jfile = FileInfo(relativeFile.path, FileType.getType(this))
     if (detail) {
         jfile.lastUpdateOn = this.lastModified()
         jfile.size = this.length()

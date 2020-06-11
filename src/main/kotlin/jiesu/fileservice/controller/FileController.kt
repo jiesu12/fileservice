@@ -1,7 +1,7 @@
 package jiesu.fileservice.controller
 
 import jiesu.fileservice.dto.BooleanResponse
-import jiesu.fileservice.model.JFile
+import jiesu.fileservice.model.FileInfo
 import jiesu.fileservice.service.FileService
 import org.springframework.web.bind.annotation.*
 
@@ -10,14 +10,14 @@ import org.springframework.web.bind.annotation.*
 class FileController(val fileService: FileService) {
 
     @GetMapping
-    fun getFile(@RequestParam path: String?): JFile =
+    fun getFile(@RequestParam path: String?): FileInfo =
             if (path == null)
                 fileService.getJFile(".", true)
             else
                 fileService.getJFile(path, true)
 
     @GetMapping("/list")
-    fun list(@RequestParam path: String?): List<JFile> =
+    fun list(@RequestParam path: String?): List<FileInfo> =
             if (path == null)
                 fileService.list(".", false)
             else
