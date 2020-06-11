@@ -7,6 +7,8 @@ import io.jsonwebtoken.Jwts
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.cloud.client.ServiceInstance
+import org.springframework.cloud.client.discovery.DiscoveryClient
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity
@@ -51,8 +53,12 @@ class SecurityConfig(val tokenAuthenticationFilter: TokenAuthenticationFilter,
 @Configuration
 class TokenConfig {
     @Bean
-    fun publicKey(@Value("\${fileswim.jwt.pubKeyUrl}") jwtPubKeyUrl: String): PublicKey {
-        val pubKey: Array<String>? = RestTemplate().getForObject(jwtPubKeyUrl, Array<String>::class.java)
+    fun publicKey(discoveryClient: DiscoveryClient): PublicKey {
+        val fileswims: List<ServiceInstance> = discoveryClient.getInstances("fileswim")
+        if (fileswims.isEmpty()) {
+            throw RuntimeException("Fileswim instance is not found.")
+        }
+        val pubKey: Array<String>? = RestTemplate().getForObject("${fileswims[0].uri}/fileswim/tokenPubKey", Array<String>::class.java)
         if (pubKey == null) {
             throw RuntimeException("Failed to get public key for JWT token from Fileswim service.")
         } else {

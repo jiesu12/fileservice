@@ -1,5 +1,4 @@
 server.port: 8100
 
 eureka.client.serviceUrl.defaultZone: http://localhost:8000/eureka
-fileswim.jwt.pubKeyUrl: http://localhost:8090/fileswim/tokenPubKey
 fileservice.path.file: /home/jie/tmp/fileswim/file
