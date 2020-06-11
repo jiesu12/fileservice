@@ -1,0 +1,4 @@
+server.port: 8100
+
+fileswim.jwt.pubKeyUrl: http://localhost:8090/fileswim/tokenPubKey
+fileservice.path.file: /home/jie/tmp/fileswim/file
