@@ -12,9 +12,9 @@ class FileController(val fileService: FileService) {
     @GetMapping
     fun getFile(@RequestParam path: String?): FileInfo =
             if (path == null)
-                fileService.getJFile(".", true)
+                fileService.getFileInfo(".", true)
             else
-                fileService.getJFile(path, true)
+                fileService.getFileInfo(path, true)
 
     @GetMapping("/list")
     fun list(@RequestParam path: String?): List<FileInfo> =

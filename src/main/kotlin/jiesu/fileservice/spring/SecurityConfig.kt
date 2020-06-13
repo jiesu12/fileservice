@@ -39,7 +39,7 @@ import javax.servlet.http.HttpServletRequest
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 class SecurityConfig(val tokenAuthenticationFilter: TokenAuthenticationFilter,
-                     @Value("\${fileswim.security.enabled:true}") val secured: Boolean) : WebSecurityConfigurerAdapter() {
+                     @Value("\${fileservice.security.enabled:true}") val secured: Boolean) : WebSecurityConfigurerAdapter() {
 
     override fun configure(http: HttpSecurity) {
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)

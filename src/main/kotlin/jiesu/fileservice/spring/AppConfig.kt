@@ -1,4 +1,4 @@
-package jiesu.fileservice.service
+package jiesu.fileservice.spring
 
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
@@ -9,4 +9,6 @@ import java.io.File
 class AppConfig {
     @Bean
     fun getBasedir(@Value("\${fileservice.path.file}") dir: String) = File(dir)
+
+
 }
