@@ -4,3 +4,5 @@
 * Extract
 * run `bin/elasticsearch`
 
+## Curl Commands
+* `curl http://localhost:9200/file/_search?q=keyword`
