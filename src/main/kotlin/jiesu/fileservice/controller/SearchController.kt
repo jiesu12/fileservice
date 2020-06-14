@@ -1,21 +1,26 @@
 package jiesu.fileservice.controller
 
-import jiesu.fileservice.model.SearchableFile
 import jiesu.fileservice.service.SearchService
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/search")
 class SearchController(val searchService: SearchService) {
-    @GetMapping("/index")
-    fun test() {
-        searchService.index("test.txt")
+    @PostMapping
+    fun index(@RequestParam path: String) {
+        searchService.index(path)
     }
 
-    @GetMapping("/query")
-    fun query(): SearchableFile? {
-        return searchService.query("test.txt")
+    @DeleteMapping
+    fun delete(@RequestParam path: String) {
+        searchService.delete(path)
+    }
+
+    /**
+     * Return a list of paths.
+     */
+    @GetMapping
+    fun query(@RequestParam keyword: String): List<String> {
+        return searchService.query(keyword)
     }
 }
