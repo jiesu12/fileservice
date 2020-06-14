@@ -42,6 +42,7 @@ class SecurityConfig(val tokenAuthenticationFilter: TokenAuthenticationFilter,
                      @Value("\${fileservice.security.enabled:true}") val secured: Boolean) : WebSecurityConfigurerAdapter() {
 
     override fun configure(http: HttpSecurity) {
+        http.csrf().disable()
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         if (secured) {
             http.authorizeRequests().antMatchers("/api/**").authenticated().antMatchers("/**").permitAll()
