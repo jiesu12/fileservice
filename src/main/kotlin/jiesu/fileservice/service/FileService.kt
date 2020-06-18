@@ -24,16 +24,19 @@ class FileService(val dir: File) {
         return TextFile(file.getMeta(dir, true), file.readText())
     }
 
-    fun saveText(path: String, lastUpdateOn: Long, text: String): FileMeta {
+    @Synchronized
+    fun saveText(path: String, lastUpdateOn: Long, text: String): String? {
         val file = checkPermission(path)
         val meta = file.getMeta(dir, true)
+        var message: String? = null
         if (meta.lastUpdateOn != lastUpdateOn) {
             val backup = File(file.path + "." + System.currentTimeMillis())
-            log.info("File {} has been modified. Saving it as {}.", meta, backup)
+            message = "File ${meta.fullName} has been modified by another program. Backing up the existing copy as ${backup} before saving."
+            log.info(message)
             file.copyTo(backup, true)
         }
         file.writeText(text)
-        return file.getMeta(dir, true)
+        return message
     }
 
     private fun checkPermission(path: String): File {

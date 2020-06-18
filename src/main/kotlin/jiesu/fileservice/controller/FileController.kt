@@ -1,5 +1,6 @@
 package jiesu.fileservice.controller
 
+import jiesu.fileservice.dto.SaveFileResponse
 import jiesu.fileservice.model.FileMeta
 import jiesu.fileservice.model.TextFile
 import jiesu.fileservice.service.FileService
@@ -30,8 +31,15 @@ class FileController(val fileService: FileService) {
             fileService.getTextFile(decode(path))
 
     @PostMapping("/text")
-    fun saveText(@RequestParam path: String, @RequestParam lastUpdateOn: Long, @RequestBody text: String): FileMeta =
-            fileService.saveText(decode(path), lastUpdateOn, text)
+    fun saveText(@RequestParam path: String,
+                 @RequestParam lastUpdateOn: Long,
+                 @RequestBody text: String): SaveFileResponse {
+        synchronized(this) {
+            val msg = fileService.saveText(decode(path), lastUpdateOn, text)
+            val meta = fileService.getFileInfo(decode(path), true)
+            return SaveFileResponse(meta, msg)
+        }
+    }
 
     fun decode(path: String): String = URLDecoder.decode(path, StandardCharsets.UTF_8.toString())
 }
