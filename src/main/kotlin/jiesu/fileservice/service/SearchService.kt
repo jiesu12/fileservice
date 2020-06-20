@@ -1,6 +1,7 @@
 package jiesu.fileservice.service
 
 import jiesu.fileservice.model.SearchableFile
+import org.elasticsearch.ElasticsearchStatusException
 import org.elasticsearch.index.query.QueryBuilders
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
@@ -31,5 +32,15 @@ class SearchService(val elasticsearchOperations: ElasticsearchOperations,
 
     fun delete(path: String) {
         elasticsearchOperations.delete(path, indexCoordinates)
+    }
+
+    fun reIndex(): Boolean {
+        val query = NativeSearchQueryBuilder().withQuery(QueryBuilders.matchAllQuery()).build()
+        try {
+            elasticsearchOperations.delete(query, SearchableFile::class.java, indexCoordinates)
+        } catch (e: ElasticsearchStatusException) {
+        }
+        dir.walkTopDown().onEnter { it.name != ".git" }.filter { it.isFile }.forEach { index(it.getMeta(dir, false).fullName) }
+        return true
     }
 }

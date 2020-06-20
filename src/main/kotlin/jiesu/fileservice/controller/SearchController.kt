@@ -1,5 +1,6 @@
 package jiesu.fileservice.controller
 
+import jiesu.fileservice.dto.BooleanResponse
 import jiesu.fileservice.service.SearchService
 import org.springframework.web.bind.annotation.*
 
@@ -22,5 +23,10 @@ class SearchController(val searchService: SearchService) {
     @GetMapping
     fun query(@RequestParam keyword: String): List<String> {
         return searchService.query(keyword)
+    }
+
+    @PostMapping("/reindex")
+    fun reIndex(): BooleanResponse {
+        return BooleanResponse(searchService.reIndex())
     }
 }
