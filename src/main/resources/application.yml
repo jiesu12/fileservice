@@ -6,3 +6,11 @@ eureka:
   instance.metadataMap.name: "one"
 fileservice.path.file: /home/jie/tmp/fileswim/file
 elasticsearch.host: localhost:9200
+
+logging:
+  level:
+    root: INFO
+    org.springframework: INFO
+  file:
+    max-size: 1MB
+    max-history: 10
