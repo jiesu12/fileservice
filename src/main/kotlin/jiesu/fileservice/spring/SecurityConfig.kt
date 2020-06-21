@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.ExpiredJwtException
 import io.jsonwebtoken.Jwts
+import jiesu.fileservice.service.PublicKeyHolder
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -70,7 +71,7 @@ class TokenConfig {
 }
 
 @Service
-class TokenAuthenticationFilter(val objectMapper: ObjectMapper, val publicKey: PublicKey) : GenericFilterBean() {
+class TokenAuthenticationFilter(val objectMapper: ObjectMapper, val publicKeyHolder: PublicKeyHolder) : GenericFilterBean() {
 
     companion object {
         val log: Logger = LoggerFactory.getLogger(TokenAuthenticationFilter::class.java)
@@ -125,7 +126,7 @@ class TokenAuthenticationFilter(val objectMapper: ObjectMapper, val publicKey: P
     fun <T> parseToken(token: String, tokenPurpose: TokenPurpose, clazz: Class<T>): T {
         return try {
             val body: Claims = Jwts.parserBuilder()
-                    .setSigningKey(publicKey)
+                    .setSigningKey(publicKeyHolder.publicKey)
                     .build()
                     .parseClaimsJws(token)
                     .body
