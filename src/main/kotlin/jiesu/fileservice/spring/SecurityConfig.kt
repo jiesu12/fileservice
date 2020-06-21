@@ -8,9 +8,6 @@ import jiesu.fileservice.service.PublicKeyHolder
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.cloud.client.ServiceInstance
-import org.springframework.cloud.client.discovery.DiscoveryClient
-import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
@@ -21,13 +18,8 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken
 import org.springframework.stereotype.Service
-import org.springframework.web.client.RestTemplate
 import org.springframework.web.filter.GenericFilterBean
 import java.io.IOException
-import java.math.BigInteger
-import java.security.KeyFactory
-import java.security.PublicKey
-import java.security.spec.RSAPublicKeySpec
 import javax.servlet.FilterChain
 import javax.servlet.ServletRequest
 import javax.servlet.ServletResponse
@@ -49,24 +41,6 @@ class SecurityConfig(val tokenAuthenticationFilter: TokenAuthenticationFilter,
             http.authorizeRequests().antMatchers("/api/**").authenticated().antMatchers("/**").permitAll()
         }
         http.addFilterBefore(tokenAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
-    }
-}
-
-@Configuration
-class TokenConfig {
-    @Bean
-    fun publicKey(discoveryClient: DiscoveryClient): PublicKey {
-        val fileswims: List<ServiceInstance> = discoveryClient.getInstances("fileswim")
-        if (fileswims.isEmpty()) {
-            throw RuntimeException("Fileswim instance is not found.")
-        }
-        val pubKey: Array<String>? = RestTemplate().getForObject("${fileswims[0].uri}/fileswim/tokenPubKey", Array<String>::class.java)
-        if (pubKey == null) {
-            throw RuntimeException("Failed to get public key for JWT token from Fileswim service.")
-        } else {
-            val spec = RSAPublicKeySpec(BigInteger(pubKey[0]), BigInteger(pubKey[1]))
-            return KeyFactory.getInstance("RSA").generatePublic(spec)
-        }
     }
 }
 
