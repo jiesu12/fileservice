@@ -1,9 +1,12 @@
 server.port: 8100
 
 eureka:
-  client.serviceUrl.defaultZone: http://localhost:8000/eureka
-  # must be lower case because it is used as elasticsearch index name
-  instance.metadataMap.name: "one"
+  client.serviceUrl.defaultZone: http://bt:8000/eureka
+  instance:
+    # must be lower case because it is used as elasticsearch index name
+    metadataMap.name: "one"
+    preferIpAddress: true
+
 fileservice.path.file: /home/jie/tmp/fileswim/file
 elasticsearch.host: localhost:9200
 
