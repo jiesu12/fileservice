@@ -1,8 +1,11 @@
 package jiesu.fileservice.service
 
 import jiesu.fileservice.model.SearchableFile
+import jiesu.fileservice.spring.TokenAuthenticationFilter
 import org.elasticsearch.ElasticsearchStatusException
 import org.elasticsearch.index.query.QueryBuilders
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder
@@ -14,6 +17,10 @@ class SearchService(val elasticsearchOperations: ElasticsearchOperations,
                     val fileService: FileService,
                     val dir: File,
                     val indexCoordinates: IndexCoordinates) {
+
+    companion object {
+        val log: Logger = LoggerFactory.getLogger(SearchService::class.java)
+    }
 
     fun index(path: String) {
         val fileInfo = fileService.getFileInfo(path, false)
@@ -38,7 +45,8 @@ class SearchService(val elasticsearchOperations: ElasticsearchOperations,
         val query = NativeSearchQueryBuilder().withQuery(QueryBuilders.matchAllQuery()).build()
         try {
             elasticsearchOperations.delete(query, SearchableFile::class.java, indexCoordinates)
-        } catch (e: ElasticsearchStatusException) {
+        } catch (e: Exception) {
+            log.info("First time indexing.")
         }
         dir.walkTopDown().onEnter { it.name != ".git" }.filter { it.isFile }.forEach { index(it.getMeta(dir, false).fullName) }
         return true
