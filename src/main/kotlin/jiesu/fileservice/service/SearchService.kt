@@ -12,7 +12,8 @@ import java.net.URI
 class SearchService(val fileService: FileService,
                     val dir: File,
                     val applicationContext: ApplicationContext,
-                    @Value("\${eureka.instance.metadataMap.name}") val instanceName: String) {
+                    @Value("\${eureka.instance.metadataMap.name}") val instanceName: String,
+                    @Value("\${fileservice.searchservice}") val searchServiceName: String) {
 
     private val supportedExtensions = listOf("txt", "md", "sh")
     private val restTemplate = RestTemplate()
@@ -36,7 +37,7 @@ class SearchService(val fileService: FileService,
 
     private fun getSearchService(): URI {
         val discoverClient = applicationContext.getBean(DiscoveryClient::class.java)
-        val searches = discoverClient.getInstances("search")
+        val searches = discoverClient.getInstances(searchServiceName)
         if (searches.isEmpty()) {
             throw RuntimeException("Search service is not available.")
         }
