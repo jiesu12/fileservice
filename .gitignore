@@ -4,6 +4,7 @@ target/
 !**/src/main/**
 !**/src/test/**
 *.log
+loggingFile_IS_UNDEFINED
 
 ### STS ###
 .apt_generated
