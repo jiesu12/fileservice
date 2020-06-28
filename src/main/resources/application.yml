@@ -1,7 +1,7 @@
 server.port: 8100
 
 eureka:
-  client.serviceUrl.defaultZone: http://bt:8000/eureka
+  client.serviceUrl.defaultZone: http://gate:8000/eureka
   instance:
     # used as search index name
     metadataMap.name: "test"
@@ -9,12 +9,8 @@ eureka:
 
 fileservice:
   path.file: /home/jie/tmp/fileswim/file
-  searchServiceName: searchservice
+  searchService: searchservice
 
-logging:
-  level:
-    root: INFO
-    org.springframework: INFO
-  file:
-    max-size: 1MB
-    max-history: 10
+# Somehow logging properties don't work. have to use logback-spring.xml.
+# This property is used by logback-spring.xml
+logging.file: /tmp/fileservice.log
