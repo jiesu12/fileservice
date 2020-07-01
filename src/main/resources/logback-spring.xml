@@ -1,5 +1,5 @@
 <configuration>
-    <springProperty name="loggingFile" source="logging.file" />
+    <springProperty name="loggingFile" source="logging.file"/>
     <appender name="ROLLIN" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${loggingFile}</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
@@ -14,8 +14,16 @@
             <pattern>%d [%t] %-5level %logger{36}: %msg%n</pattern>
         </encoder>
     </appender>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <jmxConfigurator/>
 
     <root level="INFO">
-        <appender-ref ref="ROLLIN" />
+        <appender-ref ref="ROLLIN"/>
+<!--        <appender-ref ref="STDOUT"/>-->
     </root>
 </configuration>
