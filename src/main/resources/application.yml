@@ -19,12 +19,8 @@ management:
     health:
       show-details: ALWAYS
 
-# Somehow logging properties don't work. have to use logback-spring.xml.
-# This property is used by logback-spring.xml
-logging.file: /tmp/fileservice.log
+logging.file.name: /tmp/fileservice.log
 
 fileservice:
   path.file: /home/jie/tmp/fileswim/file
   searchService: searchservice
-
-
