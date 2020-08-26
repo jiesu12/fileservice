@@ -59,7 +59,7 @@ class TokenAuthenticationFilter(val objectMapper: ObjectMapper, val publicKeyHol
             SecurityContextHolder.getContext().authentication =
                     PreAuthenticatedAuthenticationToken(user, null, emptyList())
         } else {
-            val htmlLink: HtmlLink? = getTokenFromRequestParams(request)
+            val htmlLink: User? = getTokenFromRequestParams(request)
             if (htmlLink != null) {
                 SecurityContextHolder.getContext().authentication =
                         PreAuthenticatedAuthenticationToken(htmlLink, null, emptyList())
@@ -85,11 +85,11 @@ class TokenAuthenticationFilter(val objectMapper: ObjectMapper, val publicKeyHol
      * So we use a short life token for such purpose. This token can be provided as URL GET
      * parameter.
      */
-    private fun getTokenFromRequestParams(request: HttpServletRequest): HtmlLink? {
+    private fun getTokenFromRequestParams(request: HttpServletRequest): User? {
         val token = request.getParameter(TOKEN_NAME)
         if (token != null) {
             try {
-                return parseToken(token, TokenPurpose.HTML_LINK, HtmlLink::class.java)
+                return parseToken(token, TokenPurpose.HTML_LINK, User::class.java)
             } catch (e: Exception) {
                 log.debug("Invalid token in URL param, reason - {}", e.toString())
             }
@@ -130,5 +130,3 @@ class AuthException : RuntimeException {
 }
 
 data class User(val username: String)
-
-data class HtmlLink(val name: String, val fspath: String)

@@ -5,8 +5,14 @@ import jiesu.fileservice.model.TextFile
 import jiesu.fileservice.model.enums.FileType
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.core.io.InputStreamResource
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import java.io.File
+import java.io.InputStream
 
 @Service
 class FileService(val dir: File) {
@@ -31,12 +37,24 @@ class FileService(val dir: File) {
         var message: String? = null
         if (meta.lastUpdateOn != lastUpdateOn) {
             val backup = File(file.path + "." + System.currentTimeMillis())
-            message = "File ${meta.fullName} has been modified by another program. Backing up the existing copy as ${backup} before saving."
+            message = "File ${meta.fullName} has been modified by another program. Backing up the existing copy as $backup before saving."
             log.info(message)
             file.copyTo(backup, true)
         }
         file.writeText(text)
         return message
+    }
+
+    fun download(path: String): ResponseEntity<InputStreamResource> {
+        val file = checkPermission(path)
+        val respHeaders = HttpHeaders()
+        respHeaders.contentType = MediaType.APPLICATION_OCTET_STREAM
+        respHeaders.setContentDispositionFormData("attachment", path)
+
+        val inputStream: InputStream = file.inputStream()
+        respHeaders.add("Content-Length", (file.getMeta(dir, true).size ?: 0).toString())
+        val isr = InputStreamResource(inputStream)
+        return ResponseEntity(isr, respHeaders, HttpStatus.OK)
     }
 
     private fun checkPermission(path: String): File {

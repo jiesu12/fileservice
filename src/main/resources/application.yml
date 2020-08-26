@@ -1,7 +1,7 @@
 server.port: 8100
 
 eureka:
-  client.serviceUrl.defaultZone: http://192.168.1.158:8000/eureka
+  client.serviceUrl.defaultZone: http://192.168.1.158:8761/eureka
   instance:
     # used as search index name
     metadataMap.name: "test"

@@ -4,9 +4,12 @@ import jiesu.fileservice.dto.SaveFileResponse
 import jiesu.fileservice.model.FileMeta
 import jiesu.fileservice.model.TextFile
 import jiesu.fileservice.service.FileService
+import org.springframework.core.io.InputStreamResource
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
+
 
 @RestController
 @RequestMapping("/api/file")
@@ -24,6 +27,7 @@ class FileController(val fileService: FileService) {
             if (path == null)
                 fileService.list(".", false)
             else
+                
                 fileService.list(decode(path), false)
 
     @GetMapping("/text")
@@ -40,6 +44,10 @@ class FileController(val fileService: FileService) {
             return SaveFileResponse(meta, msg)
         }
     }
+
+    @GetMapping("/download")
+    fun download(@RequestParam path: String): ResponseEntity<InputStreamResource> =
+            fileService.download(decode(path))
 
     fun decode(path: String): String = URLDecoder.decode(path, StandardCharsets.UTF_8.toString())
 }
