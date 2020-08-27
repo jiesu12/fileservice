@@ -7,6 +7,7 @@ import jiesu.fileservice.service.FileService
 import org.springframework.core.io.InputStreamResource
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.multipart.MultipartFile
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 
@@ -27,7 +28,7 @@ class FileController(val fileService: FileService) {
             if (path == null)
                 fileService.list(".", false)
             else
-                
+
                 fileService.list(decode(path), false)
 
     @GetMapping("/text")
@@ -48,6 +49,13 @@ class FileController(val fileService: FileService) {
     @GetMapping("/download")
     fun download(@RequestParam path: String): ResponseEntity<InputStreamResource> =
             fileService.download(decode(path))
+
+    @PostMapping("/upload")
+    fun upload(@RequestParam dir: String,
+               @RequestParam file: MultipartFile): FileMeta =
+            file.inputStream.use {
+                fileService.upload(it, dir, file.originalFilename ?: throw RuntimeException("Missing file name."))
+            }
 
     fun decode(path: String): String = URLDecoder.decode(path, StandardCharsets.UTF_8.toString())
 }

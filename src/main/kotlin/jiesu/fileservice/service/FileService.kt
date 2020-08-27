@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service
 import java.io.File
 import java.io.InputStream
 
+
 @Service
 class FileService(val dir: File) {
     companion object {
@@ -55,6 +56,19 @@ class FileService(val dir: File) {
         respHeaders.add("Content-Length", (file.getMeta(dir, true).size ?: 0).toString())
         val isr = InputStreamResource(inputStream)
         return ResponseEntity(isr, respHeaders, HttpStatus.OK)
+    }
+
+    fun upload(inputStream: InputStream, dirName: String, filename: String): FileMeta {
+        val parent = checkPermission(dirName)
+        if (parent.isFile) {
+            throw RuntimeException("File upload destination is not a directory.")
+        }
+        val target: File = parent.resolve(filename)
+        if (target.exists()) {
+            throw RuntimeException("$filename already exists.")
+        }
+        target.outputStream().use { inputStream.copyTo(it) }
+        return target.getMeta(dir, true)
     }
 
     private fun checkPermission(path: String): File {

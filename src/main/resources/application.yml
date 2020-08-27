@@ -21,6 +21,11 @@ management:
 
 logging.file.name: /tmp/fileservice.log
 
+spring:
+  servlet.multipart:
+    max-file-size: 1000MB
+    max-request-size: 1000MB
+
 fileservice:
   path.file: /home/jie/tmp/fileswim/file
   searchService: searchservice
