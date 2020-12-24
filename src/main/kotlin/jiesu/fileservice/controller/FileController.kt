@@ -66,5 +66,9 @@ class FileController(val fileService: FileService) {
             )
         }
 
+    @PostMapping("/rename")
+    fun rename(@RequestParam path: String, @RequestParam newName: String): FileMeta =
+        fileService.rename(decode(path), newName)
+
     fun decode(path: String): String = URLDecoder.decode(path, StandardCharsets.UTF_8.toString())
 }

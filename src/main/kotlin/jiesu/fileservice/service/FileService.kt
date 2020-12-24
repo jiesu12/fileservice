@@ -72,6 +72,16 @@ class FileService(val dir: File) {
         return target.getMeta(dir, true)
     }
 
+    fun rename(path: String, newName: String): FileMeta {
+        val file = checkPermission(path)
+        val newFile = file.parentFile.resolve(newName)
+        if (file.renameTo(newFile)) {
+            return newFile.getMeta(dir, false)
+        } else {
+            throw RuntimeException("Failed to rename.")
+        }
+    }
+
     private fun checkPermission(path: String): File {
         val file = File(dir, path).normalize()
         if (!file.startsWith(dir)) {
