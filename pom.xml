@@ -10,7 +10,7 @@
     </parent>
     <groupId>jiesu</groupId>
     <artifactId>fileservice</artifactId>
-    <version>1.10.0</version>
+    <version>1.11.0</version>
     <name>fileservice</name>
     <description>File Service</description>
 
