@@ -24,7 +24,7 @@ class FileService(val dir: File) {
     fun getFileInfo(path: String, detail: Boolean): FileMeta = checkPermission(path).getMeta(dir, detail)
 
     fun list(path: String, detail: Boolean): List<FileMeta> =
-            checkPermission(path).listFiles()?.map { it.getMeta(dir, detail) }?.toList().orEmpty()
+        checkPermission(path).listFiles()?.map { it.getMeta(dir, detail) }?.toList().orEmpty()
 
     fun getTextFile(path: String): TextFile {
         val file = checkPermission(path)
@@ -38,7 +38,8 @@ class FileService(val dir: File) {
         var message: String? = null
         if (meta.lastUpdateOn != lastUpdateOn) {
             val backup = File(file.path + "." + System.currentTimeMillis())
-            message = "File ${meta.fullName} has been modified by another program. Backing up the existing copy as $backup before saving."
+            message =
+                "File ${meta.fullName} has been modified by another program. Backing up the existing copy as $backup before saving."
             log.info(message)
             file.copyTo(backup, true)
         }
@@ -58,13 +59,13 @@ class FileService(val dir: File) {
         return ResponseEntity(isr, respHeaders, HttpStatus.OK)
     }
 
-    fun upload(inputStream: InputStream, dirName: String, filename: String): FileMeta {
+    fun upload(inputStream: InputStream, dirName: String, overwrite: Boolean, filename: String): FileMeta {
         val parent = checkPermission(dirName)
         if (parent.isFile) {
             throw RuntimeException("File upload destination is not a directory.")
         }
         val target: File = parent.resolve(filename)
-        if (target.exists()) {
+        if (!overwrite && target.exists()) {
             throw RuntimeException("$filename already exists.")
         }
         target.outputStream().use { inputStream.copyTo(it) }

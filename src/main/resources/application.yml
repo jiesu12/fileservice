@@ -27,5 +27,5 @@ spring:
     max-request-size: 1000MB
 
 fileservice:
-  path.file: /home/jie/tmp/fileswim/file
+  path.file: /home/jie/tmp/testfileservice
   searchService: searchservice

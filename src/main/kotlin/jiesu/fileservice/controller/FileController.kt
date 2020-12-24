@@ -18,27 +18,28 @@ class FileController(val fileService: FileService) {
 
     @GetMapping
     fun getFileMeta(@RequestParam path: String?): FileMeta =
-            if (path == null)
-                fileService.getFileInfo(".", true)
-            else
-                fileService.getFileInfo(decode(path), true)
+        if (path == null)
+            fileService.getFileInfo(".", true)
+        else
+            fileService.getFileInfo(decode(path), true)
 
     @GetMapping("/list")
     fun list(@RequestParam path: String?): List<FileMeta> =
-            if (path == null)
-                fileService.list(".", false)
-            else
-
-                fileService.list(decode(path), false)
+        if (path == null)
+            fileService.list(".", false)
+        else
+            fileService.list(decode(path), false)
 
     @GetMapping("/text")
     fun getTextFile(@RequestParam path: String): TextFile =
-            fileService.getTextFile(decode(path))
+        fileService.getTextFile(decode(path))
 
     @PostMapping("/text")
-    fun saveText(@RequestParam path: String,
-                 @RequestParam lastUpdateOn: Long,
-                 @RequestBody text: String): SaveFileResponse {
+    fun saveText(
+        @RequestParam path: String,
+        @RequestParam lastUpdateOn: Long,
+        @RequestBody text: String
+    ): SaveFileResponse {
         synchronized(this) {
             val msg = fileService.saveText(decode(path), lastUpdateOn, text)
             val meta = fileService.getFileInfo(decode(path), true)
@@ -48,14 +49,22 @@ class FileController(val fileService: FileService) {
 
     @GetMapping("/download")
     fun download(@RequestParam path: String): ResponseEntity<InputStreamResource> =
-            fileService.download(decode(path))
+        fileService.download(decode(path))
 
     @PostMapping("/upload")
-    fun upload(@RequestParam dir: String,
-               @RequestParam file: MultipartFile): FileMeta =
-            file.inputStream.use {
-                fileService.upload(it, dir, file.originalFilename ?: throw RuntimeException("Missing file name."))
-            }
+    fun upload(
+        @RequestParam dir: String,
+        @RequestParam file: MultipartFile,
+        @RequestParam overwrite: Boolean
+    ): FileMeta =
+        file.inputStream.use {
+            fileService.upload(
+                it,
+                dir,
+                overwrite,
+                file.originalFilename ?: throw RuntimeException("Missing file name.")
+            )
+        }
 
     fun decode(path: String): String = URLDecoder.decode(path, StandardCharsets.UTF_8.toString())
 }
