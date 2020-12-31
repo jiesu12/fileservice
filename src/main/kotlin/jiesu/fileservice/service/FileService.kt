@@ -6,10 +6,7 @@ import jiesu.fileservice.model.enums.FileType
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.core.io.InputStreamResource
-import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
-import org.springframework.http.ResponseEntity
+import org.springframework.http.*
 import org.springframework.stereotype.Service
 import java.io.File
 import java.io.InputStream
@@ -50,8 +47,8 @@ class FileService(val dir: File) {
     fun download(path: String): ResponseEntity<InputStreamResource> {
         val file = checkPermission(path)
         val respHeaders = HttpHeaders()
-        respHeaders.contentType = MediaType.APPLICATION_OCTET_STREAM
-        respHeaders.setContentDispositionFormData("attachment", path)
+        respHeaders.contentType = file.getMediaType()
+        respHeaders.contentDisposition = ContentDisposition.builder("inline").filename(path).build()
 
         val inputStream: InputStream = file.inputStream()
         respHeaders.add("Content-Length", (file.getMeta(dir, true).size ?: 0).toString())
@@ -99,4 +96,24 @@ fun File.getMeta(relativeTo: File, detail: Boolean): FileMeta {
         fileInfo.size = this.length()
     }
     return fileInfo
+}
+
+fun File.getMediaType(): MediaType {
+    return when (extension.toLowerCase()) {
+        "pdf" -> {
+            MediaType.APPLICATION_PDF
+        }
+        "txt", "html" -> {
+            MediaType.TEXT_HTML
+        }
+        "json" -> {
+            MediaType.APPLICATION_JSON
+        }
+        "xml" -> {
+            MediaType.APPLICATION_XML
+        }
+        else -> {
+            MediaType.APPLICATION_OCTET_STREAM
+        }
+    }
 }

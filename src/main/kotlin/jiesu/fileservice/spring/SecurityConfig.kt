@@ -37,6 +37,7 @@ class SecurityConfig(val tokenAuthenticationFilter: TokenAuthenticationFilter,
     override fun configure(http: HttpSecurity) {
         http.csrf().disable()
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        http.headers().frameOptions().disable()
         if (secured) {
             http.authorizeRequests().antMatchers("/api/**").authenticated().antMatchers("/**").permitAll()
         }
