@@ -47,6 +47,7 @@ class FileController(val fileService: FileService) {
         }
     }
 
+    // TODO: check HtmlLink.fspath should match the download file path.
     @GetMapping("/download")
     fun download(@RequestParam path: String): ResponseEntity<InputStreamResource> =
         fileService.download(decode(path))
