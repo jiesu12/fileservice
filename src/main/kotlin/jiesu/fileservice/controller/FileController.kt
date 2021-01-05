@@ -4,8 +4,10 @@ import jiesu.fileservice.dto.SaveFileResponse
 import jiesu.fileservice.model.FileMeta
 import jiesu.fileservice.model.TextFile
 import jiesu.fileservice.service.FileService
+import jiesu.fileservice.spring.HtmlLink
 import org.springframework.core.io.InputStreamResource
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import java.net.URLDecoder
@@ -49,8 +51,13 @@ class FileController(val fileService: FileService) {
 
     // TODO: check HtmlLink.fspath should match the download file path.
     @GetMapping("/download")
-    fun download(@RequestParam path: String): ResponseEntity<InputStreamResource> =
-        fileService.download(decode(path))
+    fun download(@AuthenticationPrincipal htmlLink: HtmlLink,
+                 @RequestParam path: String): ResponseEntity<InputStreamResource> {
+        if (htmlLink.fspath != path) {
+            throw IllegalArgumentException("Mismatched token for downloading file.")
+        }
+        return fileService.download(decode(path))
+    }
 
     @PostMapping("/upload")
     fun upload(
