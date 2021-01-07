@@ -20,8 +20,8 @@ class FileService(val dir: File) {
 
     fun getFileInfo(path: String, detail: Boolean): FileMeta = checkPermission(path).getMeta(dir, detail)
 
-    fun list(path: String, detail: Boolean): List<FileMeta> =
-        checkPermission(path).listFiles()?.map { it.getMeta(dir, detail) }?.toList().orEmpty()
+    fun list(path: String): List<FileMeta> =
+        checkPermission(path).listFiles()?.map { it.getMeta(dir, true) }?.toList().orEmpty()
 
     fun getTextFile(path: String): TextFile {
         val file = checkPermission(path)
@@ -73,10 +73,23 @@ class FileService(val dir: File) {
         val file = checkPermission(path)
         val newFile = file.parentFile.resolve(newName)
         if (file.renameTo(newFile)) {
-            return newFile.getMeta(dir, false)
+            return newFile.getMeta(dir, true)
         } else {
             throw RuntimeException("Failed to rename.")
         }
+    }
+
+    fun create(path: String, folder: Boolean): FileMeta {
+        val file = checkPermission(path)
+        if (file.exists()) {
+            throw RuntimeException("File already exist.")
+        }
+        if (folder) {
+            file.mkdirs()
+        } else {
+            file.createNewFile()
+        }
+        return file.getMeta(dir, true)
     }
 
     private fun checkPermission(path: String): File {

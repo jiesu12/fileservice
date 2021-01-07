@@ -28,9 +28,9 @@ class FileController(val fileService: FileService) {
     @GetMapping("/list")
     fun list(@RequestParam path: String?): List<FileMeta> =
         if (path == null)
-            fileService.list(".", false)
+            fileService.list(".")
         else
-            fileService.list(decode(path), false)
+            fileService.list(decode(path))
 
     @GetMapping("/text")
     fun getTextFile(@RequestParam path: String): TextFile =
@@ -77,6 +77,10 @@ class FileController(val fileService: FileService) {
     @PostMapping("/rename")
     fun rename(@RequestParam path: String, @RequestParam newName: String): FileMeta =
         fileService.rename(decode(path), newName)
+
+    @PostMapping("/new")
+    fun create(@RequestParam path: String, @RequestParam isFolder: Boolean): FileMeta =
+        fileService.create(decode(path), isFolder)
 
     fun decode(path: String): String = URLDecoder.decode(path, StandardCharsets.UTF_8.toString())
 }
