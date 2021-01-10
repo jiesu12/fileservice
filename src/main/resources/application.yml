@@ -29,3 +29,4 @@ spring:
 fileservice:
   path.file: /home/jie/tmp/testfileservice
   searchService: searchservice
+  excelservice: excelservice

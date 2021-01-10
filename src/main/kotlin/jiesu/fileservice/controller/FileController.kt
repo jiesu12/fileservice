@@ -1,6 +1,7 @@
 package jiesu.fileservice.controller
 
 import jiesu.fileservice.dto.SaveFileResponse
+import jiesu.fileservice.model.ExcelFile
 import jiesu.fileservice.model.FileMeta
 import jiesu.fileservice.model.TextFile
 import jiesu.fileservice.service.FileService
@@ -49,10 +50,16 @@ class FileController(val fileService: FileService) {
         }
     }
 
+    @GetMapping("/excel")
+    fun getExcelFile(@RequestParam path: String): ExcelFile =
+        fileService.getExcelFile(path)
+
     // TODO: check HtmlLink.fspath should match the download file path.
     @GetMapping("/download")
-    fun download(@AuthenticationPrincipal htmlLink: HtmlLink,
-                 @RequestParam path: String): ResponseEntity<InputStreamResource> {
+    fun download(
+        @AuthenticationPrincipal htmlLink: HtmlLink,
+        @RequestParam path: String
+    ): ResponseEntity<InputStreamResource> {
         if (htmlLink.fspath != path) {
             throw IllegalArgumentException("Mismatched token for downloading file.")
         }

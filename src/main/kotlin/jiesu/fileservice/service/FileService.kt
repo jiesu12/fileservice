@@ -1,5 +1,7 @@
 package jiesu.fileservice.service
 
+import jiesu.fileservice.filereader.ExcelReader
+import jiesu.fileservice.model.ExcelFile
 import jiesu.fileservice.model.FileMeta
 import jiesu.fileservice.model.TextFile
 import jiesu.fileservice.model.enums.FileType
@@ -13,7 +15,7 @@ import java.io.InputStream
 
 
 @Service
-class FileService(val dir: File) {
+class FileService(val dir: File, val excelReader: ExcelReader) {
     companion object {
         val log: Logger = LoggerFactory.getLogger(FileService::class.java)
     }
@@ -90,6 +92,11 @@ class FileService(val dir: File) {
             file.createNewFile()
         }
         return file.getMeta(dir, true)
+    }
+
+    fun getExcelFile(path: String): ExcelFile {
+        val file = checkPermission(path)
+        return ExcelFile(file.getMeta(dir, true), excelReader.read(file))
     }
 
     private fun checkPermission(path: String): File {
