@@ -50,7 +50,7 @@ class FileService(val dir: File, val excelReader: ExcelReader) {
         val file = checkPermission(path)
         val respHeaders = HttpHeaders()
         respHeaders.contentType = file.getMediaType()
-        respHeaders.contentDisposition = ContentDisposition.builder("inline").filename(path).build()
+        respHeaders.contentDisposition = ContentDisposition.builder("inline").filename(file.name).build()
 
         val inputStream: InputStream = file.inputStream()
         respHeaders.add("Content-Length", (file.getMeta(dir, true).size ?: 0).toString())
