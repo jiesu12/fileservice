@@ -99,6 +99,30 @@ class FileService(val dir: File, val excelReader: ExcelReader) {
         return ExcelFile(file.getMeta(dir, true), excelReader.read(file))
     }
 
+    /**
+     * Return deleted file's parent.
+     */
+    fun delete(path: String): FileMeta {
+        val recycleBin: File = dir.resolve("recycle")
+        recycleBin.mkdirs()
+
+        val file = checkPermission(path)
+        if (!file.exists()) {
+            throw RuntimeException("File doesn't exist.")
+        } else if (file == dir || file == recycleBin) {
+            throw RuntimeException("Can't delete this directory.")
+        } else if (file.startsWith(recycleBin)) {
+            if (!file.delete()) {
+                throw RuntimeException("Failed to permanently delete file, make sure directory is empty.")
+            }
+        } else {
+            if (!file.renameTo(recycleBin.resolve("${file.name}.${System.currentTimeMillis()}"))) {
+                throw RuntimeException("Failed to recycle file.")
+            }
+        }
+        return file.parentFile.getMeta(dir, false)
+    }
+
     private fun checkPermission(path: String): File {
         val file = File(dir, path).normalize()
         if (!file.startsWith(dir)) {

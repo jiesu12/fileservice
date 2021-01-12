@@ -89,5 +89,9 @@ class FileController(val fileService: FileService) {
     fun create(@RequestParam path: String, @RequestParam isFolder: Boolean): FileMeta =
         fileService.create(decode(path), isFolder)
 
+    @DeleteMapping
+    fun delete(@RequestParam path: String): FileMeta =
+        fileService.delete(path)
+
     fun decode(path: String): String = URLDecoder.decode(path, StandardCharsets.UTF_8.toString())
 }
