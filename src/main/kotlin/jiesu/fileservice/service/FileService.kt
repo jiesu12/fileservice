@@ -58,7 +58,13 @@ class FileService(val dir: File, val excelReader: ExcelReader) {
         return ResponseEntity(isr, respHeaders, HttpStatus.OK)
     }
 
-    fun upload(inputStream: InputStream, dirName: String, overwrite: Boolean, filename: String): FileMeta {
+    fun upload(
+        inputStream: InputStream,
+        dirName: String,
+        overwrite: Boolean,
+        filename: String,
+        lastModified: Long?
+    ): FileMeta {
         val parent = checkPermission(dirName)
         if (parent.isFile) {
             throw RuntimeException("File upload destination is not a directory.")
@@ -68,6 +74,9 @@ class FileService(val dir: File, val excelReader: ExcelReader) {
             throw RuntimeException("$filename already exists.")
         }
         target.outputStream().use { inputStream.copyTo(it) }
+        if (lastModified != null) {
+            target.setLastModified(lastModified)
+        }
         return target.getMeta(dir, true)
     }
 

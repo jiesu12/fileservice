@@ -70,14 +70,16 @@ class FileController(val fileService: FileService) {
     fun upload(
         @RequestParam dir: String,
         @RequestParam file: MultipartFile,
-        @RequestParam overwrite: Boolean
+        @RequestParam overwrite: Boolean,
+        @RequestParam(required = false) lastModified: Long?
     ): FileMeta =
         file.inputStream.use {
             fileService.upload(
                 it,
                 dir,
                 overwrite,
-                file.originalFilename ?: throw RuntimeException("Missing file name.")
+                file.originalFilename ?: throw RuntimeException("Missing file name."),
+                lastModified
             )
         }
 
