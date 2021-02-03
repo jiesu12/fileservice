@@ -9,30 +9,36 @@ import java.io.File
 import java.net.URI
 
 @Service
-class SearchService(val fileService: FileService,
-                    val dir: File,
-                    val applicationContext: ApplicationContext,
-                    @Value("\${eureka.instance.metadataMap.name}") val instanceName: String,
-                    @Value("\${fileservice.searchservice}") val searchServiceName: String) {
+class SearchService(
+    val fileService: FileService,
+    val dir: File,
+    val applicationContext: ApplicationContext,
+    @Value("\${eureka.instance.metadataMap.name}") val instanceName: String,
+    @Value("\${fileservice.searchservice}") val searchServiceName: String
+) {
 
-    private val supportedExtensions = listOf("txt", "md", "sh")
+    private val supportedExtensions = listOf(
+        "bat", "conf", "cs", "css", "html", "java", "js", "jsx", "json", "kt", "md",
+        "py", "scss", "sh", "template", "ts", "tsx", "txt", "vim", "xml", "yml"
+    )
     private val restTemplate = RestTemplate()
 
     fun reIndex(): Boolean {
         val searchService = getSearchService()
         restTemplate.delete("${searchService}/all?indexName=${instanceName}")
         dir.walkTopDown()
-                .onEnter { it.name != ".git" }
-                .filter { it.isFile }
-                .filter { supportedExtensions.contains(it.extension) }
-                .forEach { index(searchService, it.getMeta(dir, false).fullName) }
+            .onEnter { it.name != ".git" }
+            .filter { it.isFile }
+            .forEach { index(searchService, it) }
         return true
     }
 
-    private fun index(searchService: URI, path: String) {
-        val fileInfo = fileService.getFileInfo(path, false)
-        val file = File(dir, fileInfo.fullName)
-        restTemplate.postForLocation("${searchService}?indexName=${instanceName}&path=${path}", file.readText())
+    private fun index(searchService: URI, file: File) {
+        val path = file.getMeta(dir, false).fullName
+        restTemplate.postForLocation(
+            "${searchService}?indexName=${instanceName}&path=${path}",
+            if (supportedExtensions.contains(file.extension)) file.readText() else ""
+        )
     }
 
     private fun getSearchService(): URI {
