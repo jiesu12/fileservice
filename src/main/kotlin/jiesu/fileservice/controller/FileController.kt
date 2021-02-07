@@ -13,6 +13,13 @@ import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
+import org.springframework.web.bind.annotation.RequestParam
+
+import org.springframework.web.bind.annotation.RequestHeader
+
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
+
+import org.springframework.web.bind.annotation.GetMapping
 
 
 @RestController
@@ -64,6 +71,23 @@ class FileController(val fileService: FileService) {
             throw IllegalArgumentException("Mismatched token for downloading file.")
         }
         return fileService.download(decode(path))
+    }
+
+    @GetMapping("/stream")
+    fun stream(
+        @AuthenticationPrincipal htmlLink: HtmlLink,
+        @RequestParam path: String,
+        @RequestParam(required = false) contentType: String?,
+        @RequestHeader(value = "Range", required = false) range: String?
+    ): ResponseEntity<StreamingResponseBody> {
+        if (htmlLink.fspath != path) {
+            throw IllegalArgumentException("Mismatched token for downloading file.")
+        }
+        return fileService.stream(
+            path,
+            contentType,
+            range
+        )
     }
 
     @PostMapping("/upload")

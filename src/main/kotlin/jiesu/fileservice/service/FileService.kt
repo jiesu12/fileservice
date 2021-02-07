@@ -10,8 +10,10 @@ import org.slf4j.LoggerFactory
 import org.springframework.core.io.InputStreamResource
 import org.springframework.http.*
 import org.springframework.stereotype.Service
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
 import java.io.File
 import java.io.InputStream
+import java.io.OutputStream
 
 
 @Service
@@ -51,11 +53,26 @@ class FileService(val dir: File, val excelReader: ExcelReader) {
         val respHeaders = HttpHeaders()
         respHeaders.contentType = file.getMediaType()
         respHeaders.contentDisposition = ContentDisposition.builder("inline").filename(file.name).build()
+        respHeaders.lastModified = file.lastModified()
 
         val inputStream: InputStream = file.inputStream()
         respHeaders.add("Content-Length", (file.getMeta(dir, true).size ?: 0).toString())
         val isr = InputStreamResource(inputStream)
         return ResponseEntity(isr, respHeaders, HttpStatus.OK)
+    }
+
+    fun stream(path: String, contentType: String?, range: String?): ResponseEntity<StreamingResponseBody> {
+        val file = checkPermission(path)
+        val respHeaders = HttpHeaders()
+        respHeaders.contentType = file.getMediaType()
+        respHeaders.add("Accept-Ranges", "bytes")
+        respHeaders.lastModified = file.lastModified()
+        val fileIs: InputStream = file.inputStream()
+        val fileLength = file.length()
+        val rangeStart: Long = getRangeStart(range)
+        respHeaders.add("Content-Range", "bytes " + rangeStart + "-" + (fileLength - 1) + "/" + fileLength)
+        respHeaders.contentLength = fileLength - rangeStart
+        return ResponseEntity(StreamingResponseBody { pipe(fileIs, it) }, respHeaders, HttpStatus.PARTIAL_CONTENT)
     }
 
     fun upload(
@@ -169,4 +186,29 @@ fun File.getMediaType(): MediaType {
             MediaType.APPLICATION_OCTET_STREAM
         }
     }
+}
+
+/**
+ *
+ * @param range
+ *            assuming it looks like "bytes=0-" or "bytes=653398850-" or
+ *            "bytes=0-12345" null
+ */
+private fun getRangeStart(rangeString: String?): Long {
+    if (rangeString == null) {
+        return 0
+    }
+    var range = rangeString
+    range = range.replace("bytes=", "")
+    range = range.substring(0, range.indexOf("-"))
+    return range.trim { it <= ' ' }.toLong()
+}
+
+private fun pipe(inputStream: InputStream, outputStream: OutputStream) {
+    val data = ByteArray(2048)
+    var read = 0
+    while (inputStream.read(data).also { read = it } > 0) {
+        outputStream.write(data, 0, read)
+    }
+    outputStream.flush()
 }
