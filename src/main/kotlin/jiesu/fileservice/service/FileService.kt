@@ -61,18 +61,19 @@ class FileService(val dir: File, val excelReader: ExcelReader) {
         return ResponseEntity(isr, respHeaders, HttpStatus.OK)
     }
 
+    /**
+     * The 'Accept-Ranges: bytes' code has been removed. It had problem playing longer video on Chrome.
+     */
     fun stream(path: String, contentType: String?, range: String?): ResponseEntity<StreamingResponseBody> {
         val file = checkPermission(path)
         val respHeaders = HttpHeaders()
         respHeaders.contentType = file.getMediaType()
-        respHeaders.add("Accept-Ranges", "bytes")
+        respHeaders.add("Accept-Ranges", "none")
         respHeaders.lastModified = file.lastModified()
         val fileIs: InputStream = file.inputStream()
         val fileLength = file.length()
-        val rangeStart: Long = getRangeStart(range)
-        respHeaders.add("Content-Range", "bytes " + rangeStart + "-" + (fileLength - 1) + "/" + fileLength)
-        respHeaders.contentLength = fileLength - rangeStart
-        return ResponseEntity(StreamingResponseBody { pipe(fileIs, it) }, respHeaders, HttpStatus.PARTIAL_CONTENT)
+        respHeaders.contentLength = fileLength
+        return ResponseEntity(StreamingResponseBody { pipe(fileIs, it) }, respHeaders, HttpStatus.OK)
     }
 
     fun upload(
@@ -188,25 +189,9 @@ fun File.getMediaType(): MediaType {
     }
 }
 
-/**
- *
- * @param range
- *            assuming it looks like "bytes=0-" or "bytes=653398850-" or
- *            "bytes=0-12345" null
- */
-private fun getRangeStart(rangeString: String?): Long {
-    if (rangeString == null) {
-        return 0
-    }
-    var range = rangeString
-    range = range.replace("bytes=", "")
-    range = range.substring(0, range.indexOf("-"))
-    return range.trim { it <= ' ' }.toLong()
-}
-
 private fun pipe(inputStream: InputStream, outputStream: OutputStream) {
     val data = ByteArray(2048)
-    var read = 0
+    var read: Int
     while (inputStream.read(data).also { read = it } > 0) {
         outputStream.write(data, 0, read)
     }
